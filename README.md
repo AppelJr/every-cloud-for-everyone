@@ -1,3 +1,4 @@
+[![Swift](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml)
 # every-cloud-for-everyone
 
 > **When companies write a privacy policy and don't follow it, we enforce their own policy — keeping every customer safe with their own key.**
