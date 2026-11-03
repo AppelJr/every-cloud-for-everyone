@@ -4,6 +4,7 @@ import PackageDescription
 let package = Package(
     name: "EveryCloudForEveryone",
     platforms: [
+        .iOS(.v16),
         .macOS(.v13)
     ],
     products: [
@@ -14,14 +15,16 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.3")
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.3"),
+        .package(url: "https://github.com/dugleelabs/swift-argon2.git", from: "1.0.0")
     ],
     targets: [
         .target(
             name: "EveryCloudForEveryone",
             dependencies: [
                 .product(name: "Crypto", package: "swift-crypto"),
-                .product(name: "CryptoSwift", package: "CryptoSwift")
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
+                .product(name: "Argon2", package: "swift-argon2")
             ],
             path: "Sources/EveryCloudForEveryone"
         ),
