@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.3"),
-        .package(url: "https://github.com/dugleelabs/swift-argon2.git", from: "1.0.0")
+        .package(url: "https://github.com/tmthecoder/Argon2Swift.git", branch: "main")
     ],
     targets: [
         .target(
@@ -24,7 +24,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
-                .product(name: "Argon2", package: "swift-argon2")
+                .product(name: "Argon2Swift", package: "Argon2Swift")
             ],
             path: "Sources/EveryCloudForEveryone"
         ),
