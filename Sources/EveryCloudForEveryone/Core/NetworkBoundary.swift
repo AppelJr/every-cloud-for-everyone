@@ -98,10 +98,7 @@ public final class InMemoryNetworkBoundaryV1_1: NetworkBoundaryV1_1, @unchecked 
     }
 
     public func execute(_ request: URLRequest) async throws -> (Data, URLResponse) {
-        lock.lock()
-        let currentlyDenied = denied
-        lock.unlock()
-        if currentlyDenied { throw NetworkBoundaryError.lockdownActive }
+        if isDenied { throw NetworkBoundaryError.lockdownActive }
         throw NetworkBoundaryError.inMemoryTransportUnavailable
     }
 }
