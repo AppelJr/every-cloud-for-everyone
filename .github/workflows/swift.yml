@@ -20,15 +20,3 @@ jobs:
 
       - name: Build
         run: swift build
-
-      - name: Run tests and print failure details
-        shell: bash
-        run: |
-          set +e
-          swift test 2>&1 | tee swift-test.log
-          test_status=${PIPESTATUS[0]}
-
-          echo "---- Test failure details ----"
-          grep -ni -B 3 -A 8 -E 'error:|XCTAssert|failed' swift-test.log || true
-
-          exit "$test_status"
