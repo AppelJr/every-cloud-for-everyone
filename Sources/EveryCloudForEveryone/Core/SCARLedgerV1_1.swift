@@ -30,7 +30,8 @@ public final class SCARLedgerV1_1: @unchecked Sendable {
     public init() {}
 
     public var snapshot: [SCARV1_1Event] {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return events
     }
 
@@ -42,16 +43,33 @@ public final class SCARLedgerV1_1: @unchecked Sendable {
         action: String,
         timestamp: String = SCARLedgerV1_1.utcTimestamp()
     ) throws -> SCARV1_1Event {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
+
         let sequence = events.count + 1
         let previous = events.last?.eventHash ?? String(repeating: "0", count: 64)
-        let unsigned = UnsignedEvent(sequence: sequence, eventType: eventType, timestamp: timestamp,
-                                     provider: provider, reason: reason, action: action,
-                                     previousEventHash: previous)
+        let unsigned = UnsignedEvent(
+            sequence: sequence,
+            eventType: eventType,
+            timestamp: timestamp,
+            provider: provider,
+            reason: reason,
+            action: action,
+            previousEventHash: previous
+        )
+
         let hash = try Self.sha256Hex(Self.canonicalJSON(unsigned))
-        let event = SCARV1_1Event(sequence: sequence, eventType: eventType, timestamp: timestamp,
-                                  provider: provider, reason: reason, action: action,
-                                  previousEventHash: previous, eventHash: hash)
+        let event = SCARV1_1Event(
+            sequence: sequence,
+            eventType: eventType,
+            timestamp: timestamp,
+            provider: provider,
+            reason: reason,
+            action: action,
+            previousEventHash: previous,
+            eventHash: hash
+        )
+
         events.append(event)
         return event
     }
@@ -83,9 +101,12 @@ public final class SCARLedgerV1_1: @unchecked Sendable {
     }
 
     static func sha256Hex(_ data: Data) throws -> String {
-        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        SHA256.hash(data: data)
+            .map { String(format: "%02x", $0) }
+            .joined()
     }
 
+    @usableFromInline
     static func utcTimestamp() -> String {
         ISO8601DateFormatter().string(from: Date())
     }
