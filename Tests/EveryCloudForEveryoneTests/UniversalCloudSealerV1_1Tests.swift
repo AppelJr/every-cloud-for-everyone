@@ -12,7 +12,7 @@ final class UniversalCloudSealerV1_1Tests: XCTestCase {
 
         let derived = try Argon2KDFV1_1.deriveKey(password: Data(password.utf8), salt: salt).key
         let sealed = try AES.GCM.seal(plaintext, using: SymmetricKey(data: derived), nonce: AES.GCM.Nonce(data: nonce))
-        let blob = try XCTUnwrap(sealed.combined)
+        let blob = Data(sealed.ciphertext) + Data(sealed.tag)
         let digest = SHA256.hash(data: blob).map { String(format: "%02x", $0) }.joined()
         let record = try SealRecord(blobSHA256: digest, keyID: "vector-key",
                                     nonce: nonce.base64EncodedString(), provider: "Local",
