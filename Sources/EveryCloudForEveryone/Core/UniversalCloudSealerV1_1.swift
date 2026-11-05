@@ -10,7 +10,7 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
     private let stateLock = NSLock()
 
     public init(scar: SCARLedgerV1_1 = SCARLedgerV1_1(),
-                networkBoundary: NetworkBoundaryV1_1 = InMemoryNetworkBoundaryV1_1()) {
+                networkBoundary: NetworkBoundaryV1_1 = URLSessionNetworkBoundaryV1_1()) {
         self.scar = scar
         self.networkBoundary = networkBoundary
     }
@@ -44,10 +44,7 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
         var key = [UInt8](derived.key)
         defer { key.zeroize() }
 
-        if derived.usedFallback {
-            _ = try scar.append(eventType: "KDF_FALLBACK", provider: provider,
-                                reason: "argon2id_unavailable", action: "USE_SHA3_512_TRUNCATED")
-        }
+        guard !derived.usedFallback else { throw SealerError.insecureKDFFallback }
 
         let sealedBox = try AES.GCM.seal(plaintext, using: SymmetricKey(data: key),
                                          nonce: AES.GCM.Nonce(data: nonce))
@@ -74,12 +71,9 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
                 throw SealerError.invalidRecord
             }
             let derived = try Argon2KDFV1_1.deriveKey(password: Data(password.utf8), salt: salt)
+            guard !derived.usedFallback else { throw SealerError.insecureKDFFallback }
             var key = [UInt8](derived.key)
             defer { key.zeroize() }
-            if derived.usedFallback {
-                _ = try scar.append(eventType: "KDF_FALLBACK", provider: record.provider,
-                                    reason: "argon2id_unavailable", action: "USE_SHA3_512_TRUNCATED")
-            }
             let sealedBox = try AES.GCM.SealedBox(combined: blob)
             return try AES.GCM.open(sealedBox, using: SymmetricKey(data: key))
         } catch {
@@ -100,6 +94,7 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
             throw SealerError.invalidRecord
         }
         let derived = try Argon2KDFV1_1.deriveKey(password: Data(password.utf8), salt: salt)
+        guard !derived.usedFallback else { throw SealerError.insecureKDFFallback }
         var key = [UInt8](derived.key)
         defer { key.zeroize() }
         let sealedBox = try AES.GCM.SealedBox(combined: blob)
@@ -125,6 +120,7 @@ public enum SealerError: Error, Equatable {
     case blobHashMismatch
     case invalidRecord
     case missingCombinedCiphertext
+    case insecureKDFFallback
 }
 
 private extension Array where Element == UInt8 {
