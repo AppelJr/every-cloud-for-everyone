@@ -48,7 +48,9 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
 
         let sealedBox = try AES.GCM.seal(plaintext, using: SymmetricKey(data: key),
                                          nonce: AES.GCM.Nonce(data: nonce))
-        guard let blob = sealedBox.combined else { throw SealerError.missingCombinedCiphertext }
+        // v1.1 wire format stores the 12-byte nonce in SealRecord, not in blob.
+        // blob is ciphertext || 16-byte GCM tag, matching the cross-port vector.
+        let blob = Data(sealedBox.ciphertext) + Data(sealedBox.tag)
         let digest = SHA256.hash(data: blob).map { String(format: "%02x", $0) }.joined()
         let record = try SealRecord(blobSHA256: digest, keyID: keyID,
                                     nonce: nonce.base64EncodedString(), provider: provider,
@@ -74,7 +76,12 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
             guard !derived.usedFallback else { throw SealerError.insecureKDFFallback }
             var key = [UInt8](derived.key)
             defer { key.zeroize() }
-            let sealedBox = try AES.GCM.SealedBox(combined: blob)
+            guard blob.count >= 16 else { throw SealerError.invalidRecord }
+            let ciphertext = Data(blob.dropLast(16))
+            let tag = Data(blob.suffix(16))
+            let sealedBox = try AES.GCM.SealedBox(
+                nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag
+            )
             return try AES.GCM.open(sealedBox, using: SymmetricKey(data: key))
         } catch {
             if case SealerError.blobHashMismatch = error { throw error }
@@ -97,7 +104,12 @@ public final class UniversalCloudSealerV1_1: @unchecked Sendable {
         guard !derived.usedFallback else { throw SealerError.insecureKDFFallback }
         var key = [UInt8](derived.key)
         defer { key.zeroize() }
-        let sealedBox = try AES.GCM.SealedBox(combined: blob)
+        guard blob.count >= 16 else { throw SealerError.invalidRecord }
+        let ciphertext = Data(blob.dropLast(16))
+        let tag = Data(blob.suffix(16))
+        let sealedBox = try AES.GCM.SealedBox(
+            nonce: AES.GCM.Nonce(data: nonce), ciphertext: ciphertext, tag: tag
+        )
         return try AES.GCM.open(sealedBox, using: SymmetricKey(data: key))
     }
 
