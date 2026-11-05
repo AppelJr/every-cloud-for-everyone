@@ -71,7 +71,43 @@ public final class URLSessionNetworkBoundaryV1_1: NetworkBoundaryV1_1, @unchecke
     }
 }
 
+/// Deterministic in-memory boundary for unit tests. The production sealer
+/// never selects this implementation by default.
+public final class InMemoryNetworkBoundaryV1_1: NetworkBoundaryV1_1, @unchecked Sendable {
+    private let lock = NSLock()
+    private var denied = false
+
+    public init() {}
+
+    public var isDenied: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return denied
+    }
+
+    public func allowAll() {
+        lock.lock()
+        denied = false
+        lock.unlock()
+    }
+
+    public func denyAll() {
+        lock.lock()
+        denied = true
+        lock.unlock()
+    }
+
+    public func execute(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        lock.lock()
+        let currentlyDenied = denied
+        lock.unlock()
+        if currentlyDenied { throw NetworkBoundaryError.lockdownActive }
+        throw NetworkBoundaryError.inMemoryTransportUnavailable
+    }
+}
+
 public enum NetworkBoundaryError: Error, Equatable {
     case invalidDestination
     case lockdownActive
+    case inMemoryTransportUnavailable
 }
