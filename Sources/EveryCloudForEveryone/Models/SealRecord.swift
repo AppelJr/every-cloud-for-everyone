@@ -48,7 +48,7 @@ public struct SealRecord: Codable, Sendable, Equatable {
 
     public func canonicalJSON() throws -> String {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         let data = try encoder.encode(self)
         guard let value = String(data: data, encoding: .utf8) else {
             throw SealRecordError.encodingFailed
