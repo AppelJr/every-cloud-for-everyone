@@ -1,0 +1,29 @@
+[package]
+name = "sovereign-sealer"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+description = "Portable authenticated file sealing core"
+
+[lib]
+name = "sovereign_sealer"
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "sovereign-sealer"
+path = "src/main.rs"
+
+[dependencies]
+aes-gcm = "0.10"
+argon2 = "0.5"
+base64 = "0.22"
+hex = "0.4"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+zeroize = "1"
+
+[dev-dependencies]
+tempfile = "3"

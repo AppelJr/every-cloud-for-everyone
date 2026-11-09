@@ -1,125 +1,63 @@
 [![Swift](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml)
+[![Offline dispatcher](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml)
+
 # every-cloud-for-everyone
 
 > **When companies write a privacy policy and don't follow it, we enforce their own policy — keeping every customer safe with their own key.**
 
-A Swift package that applies client-side encryption on top of every major cloud provider so the provider's own end-to-end encryption promise is kept, regardless of what their servers actually do.
+## Project status
 
----
+This repository is a work in progress. The Swift package and Python offline-dispatcher adapter are separate components. This repository does **not** yet provide a shared Rust core or production-ready Rust, Python, and JavaScript cryptographic packages. The current cloud-provider names are an intended integration scope, not proof that provider adapters exist or have been verified.
 
-## How it works
+The current `UniversalCloudSealer` prototype records provider/mode metadata; it is not a verified file-encryption implementation. Do not use it to protect production data. The V1.1 password-based test/API mismatch must be resolved before the Swift package can be considered complete.
 
-Every cloud account is *sealed* before any data leaves your device:
+## Offline local tool dispatcher
 
-1. A passphrase is used to derive a 256-bit key with **Scrypt** (a memory-hard KDF similar in purpose to Argon2id, provided by CryptoSwift).
-2. The plaintext is encrypted with AES-GCM — the cloud provider only ever receives ciphertext.
-3. A SHA-256 integrity digest (Blake3-compatible interface) is computed and stored locally.
-4. QResist monitors uplinks; if a digest mismatch is detected the uplink is killed.
-5. LockdownMode can be activated to block all non-essential network traffic.
+`infrastructure/mcp_authority/dispatcher.py` provides a fail-closed adapter for an authenticated host to invoke a narrowly allowlisted local executable without a shell.
 
-```
-User passphrase
-      │
-      ▼
-  Scrypt (memory-hard) ──► 256-bit key
-      │
-      ▼
-  AES-GCM seal ──► ciphertext uploaded to cloud
-      │
-      ▼
-  Blake3Hasher ──► integrity digest stored on-device
-      │
-      ▼
-  QResist validates digest on every sync
-```
+The host—not the model request—must supply the authenticated `Identity` and its capabilities. The standalone stdin entry point deliberately refuses execution because JSON input alone cannot establish trusted identity or authorization.
 
----
+Deployment requirements:
 
-## Supported cloud providers
+- Never construct identity or capabilities from model-supplied JSON.
+- Configure absolute executable paths and narrowly scoped tool policies in trusted host code.
+- Do not allowlist a shell, general-purpose interpreter, package manager, or other unrestricted command as a model-callable production tool.
+- Keep the audit ledger and its parent directory under trusted operating-system permissions.
+- The SHA3-512 hash chain detects record edits, but does not prevent privileged truncation or replacement.
+- Apply OS-level isolation and independently review deployment policy. This adapter is not a complete MCP server, authentication system, sandbox, or production certification.
+- The current ledger implementation uses POSIX `fcntl`; Windows support is not claimed.
+- This dispatcher invokes configured local tools only; it does not implement cloud-provider adapters.
 
-| Category | Providers |
-|---|---|
-| Consumer | iCloud · Google Drive · OneDrive · Dropbox · MEGA · pCloud · Sync.com |
-| Enterprise | AWS S3 · Azure Blob · Google Cloud Storage · Backblaze B2 · Wasabi · Cloudflare R2 · DigitalOcean Spaces |
-| Self-hosted / privacy-first | Nextcloud · Box · SpiderOak · Tresorit · Proton Drive · Filen |
-| Other infrastructure | Oracle Cloud · IBM Cloud · Alibaba Cloud · Tencent Cloud |
+## Run repository checks
 
----
+Requirements: Swift 5.9+ and Python 3.11+. On supported macOS or Linux environments, run from the repository root:
 
-## Project structure
-
-```
-Package.swift
-Sources/
-  EveryCloudForEveryone/
-    Models/
-      CloudProvider.swift
-      EncryptionMode.swift
-    Core/
-      ContractEnforcer.swift
-      UniversalCloudSealer.swift
-      QResist.swift
-      LockdownMode.swift
-      KeyManager.swift
-    Crypto/
-      Blake3Hasher.swift
-      Argon2Wrapper.swift
-Tests/
-  EveryCloudForEveryoneTests/
+```bash
+./scripts/test-all.sh
 ```
 
----
+The script runs both `swift test` and the Python dispatcher unittest suite, even if one fails, then returns non-zero if either suite fails. A successful Python suite does not imply that the Swift suite or the full project is production-ready.
 
-## Getting started
+Run only the offline dispatcher tests:
 
-### Requirements
-
-- Swift 5.9+
-- Linux (Ubuntu 22.04+) or macOS 13+
-
-### Add as a Swift package
-
-```swift
-// Package.swift
-dependencies: [
-    .package(url: "https://github.com/AppelJr/every-cloud-for-everyone.git", branch: "main")
-],
-targets: [
-    .target(dependencies: [
-        .product(name: "EveryCloudForEveryone", package: "every-cloud-for-everyone")
-    ])
-]
+```bash
+cd infrastructure/mcp_authority
+python3 -m unittest discover -s tests -v
 ```
 
-### Quick example
+The offline-dispatcher CI matrix runs on Ubuntu and macOS with Python 3.11 and 3.12. The Swift workflow remains separate. Windows, Android, browser, Rust, and JavaScript support are not currently claimed or tested.
 
-```swift
-import EveryCloudForEveryone
+A green check proves only that the tests in that workflow passed. It is not a security certification, cryptographic interoperability proof, or production-readiness attestation.
 
-let results = UniversalCloudSealer.shared.sealAll(passphrase: "user-passphrase")
+## Swift package
 
-let claim = ContractEnforcer.PolicyClaim(
-    provider: "iCloud",
-    claim: "End-to-end encryption so only you and the recipient can read your data.",
-    promisesE2E: true,
-    promisesUserKeys: false
-)
-let outcome = ContractEnforcer.shared.enforce(claim: claim)
+The Swift package is currently a prototype. Before production use, the project needs a real, reviewed encryption implementation, independent fixed test vectors, and verified cross-language interoperability. Do not infer encryption from metadata, hashes, or successful unit tests alone.
 
-QResist.shared.arm()
-let onDevice = Blake3Hasher.hash(myFileData)
-QResist.shared.validate(digest: fromServer, expectedDigest: onDevice, provider: "iCloud")
-```
-
----
-
-## Running the tests
+Run the Swift package tests with:
 
 ```bash
 swift test
 ```
-
----
 
 ## License
 

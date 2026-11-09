@@ -233,7 +233,7 @@ class MCPAuthorityAdapter:
         except AuditError:
             # Withhold output if the completion record cannot be committed.
             return {"status": "error", "reason": "audit_completion_failed; output_withheld"}
-        return {"status": status, "returncode": returncode, "stdout": stdout, "stderr": stderr}
+        return {"status": status, "reason": reason, "returncode": returncode, "stdout": stdout, "stderr": stderr}
 
     @staticmethod
     def _canonical_request(request: dict[str, Any]) -> bytes:
