@@ -36,7 +36,7 @@ final class UniversalCloudSealerV1_1Tests: XCTestCase {
         let sealer = UniversalCloudSealerV1_1(networkBoundary: boundary)
         try sealer.qresist(provider: "Local", reason: "tamper")
         XCTAssertTrue(boundary.isDenied)
-        XCTAssertEqual(sealer.scar.snapshot.last?.eventType, "INTEGRITY_FAILURE")
+        XCTAssertEqual(sealer.scar.last?.eventType, "INTEGRITY_FAILURE")
 
         try sealer.lockdown()
         XCTAssertTrue(sealer.isLockdownActive)
