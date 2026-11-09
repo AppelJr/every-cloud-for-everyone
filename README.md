@@ -36,7 +36,7 @@ Requirements: Swift 5.9+ and Python 3.11+. On supported macOS or Linux environme
 ./scripts/test-all.sh
 ```
 
-The script runs `swift test` followed by the Python dispatcher unittest suite. It stops on the first missing toolchain, compile error, or failed assertion and returns a non-zero exit status. A successful Python suite does not imply that the Swift suite or the full project is production-ready.
+The script runs both `swift test` and the Python dispatcher unittest suite, even if one fails, then returns non-zero if either suite fails. A successful Python suite does not imply that the Swift suite or the full project is production-ready.
 
 Run only the offline dispatcher tests:
 
