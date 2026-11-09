@@ -1,5 +1,5 @@
 [![Swift](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/swift.yml)
-[![Offline dispatcher](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml)
+[![Offline dispatcher](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/offline-dispatcher.yml) [![Portable sealer core](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/portable-sealer.yml/badge.svg)](https://github.com/AppelJr/every-cloud-for-everyone/actions/workflows/portable-sealer.yml)
 
 # every-cloud-for-everyone
 
