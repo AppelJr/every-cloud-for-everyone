@@ -1,4 +1,5 @@
 import Foundation
+import Crypto
 
 /// A Gate-issued receipt must be supplied by the application authority adapter.
 /// This protocol intentionally has no permissive default implementation.
