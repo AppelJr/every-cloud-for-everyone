@@ -2,15 +2,9 @@ name: Swift
 
 on:
   push:
-    branches:
-      - main
-      - copilot/portable-sealer-foundation
+    branches: [ "main/**" ]
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
+    branches: [ "main/**" ]
 
 jobs:
   build:
