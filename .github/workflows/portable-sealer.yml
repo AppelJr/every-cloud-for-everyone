@@ -34,11 +34,11 @@ jobs:
       - name: Configure native CLI path (Unix)
         if: runner.os != 'Windows'
         shell: bash
-        run: echo "SOVEREIGN_SEALER_BIN=portable/rust/target/debug/sovereign-sealer" >> "$GITHUB_ENV"
+        run: echo "SOVEREIGN_SEALER_BIN=$GITHUB_WORKSPACE/portable/rust/target/debug/sovereign-sealer" >> "$GITHUB_ENV"
       - name: Configure native CLI path (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: "Add-Content -Path $env:GITHUB_ENV -Value 'SOVEREIGN_SEALER_BIN=portable/rust/target/debug/sovereign-sealer.exe'"
+        run: "Add-Content -Path $env:GITHUB_ENV -Value \"SOVEREIGN_SEALER_BIN=$env:GITHUB_WORKSPACE/portable/rust/target/debug/sovereign-sealer.exe\""
       - name: Python client tests
         working-directory: portable/python
         run: python -m unittest -v
