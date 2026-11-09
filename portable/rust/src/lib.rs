@@ -13,7 +13,7 @@ const TAG_LEN: usize = 16;
 const MAX_PLAINTEXT: usize = 64 * 1024 * 1024;
 const MEMORY_KIB: u32 = 64 * 1024;
 const ITERATIONS: u32 = 3;
-const LANES: u32 = 1;
+const LANES: u32 = 4;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SealRecord {
@@ -81,7 +81,7 @@ pub fn seal(plaintext: &[u8], password: &str, provider: &str, aad: &[u8]) -> Res
     key.zeroize();
     let digest = hex::encode(Sha256::digest(&ciphertext));
     let record = SealRecord {
-        version: 1, algorithm: "AES-256-GCM".into(), kdf: "Argon2id-v1.3-m65536-t3-p1".into(),
+        version: 1, algorithm: "AES-256-GCM".into(), kdf: "Argon2id-v1.3-m65536-t3-p4".into(),
         salt: STANDARD.encode(salt), nonce: STANDARD.encode(nonce), blob_sha256: digest,
         key_id: "password-derived-v1".into(), provider: provider.into(),
         sealed_at: "caller-supplied-or-omitted".into(),
