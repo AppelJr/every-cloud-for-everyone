@@ -91,7 +91,7 @@ pub fn seal(plaintext: &[u8], password: &str, provider: &str, aad: &[u8]) -> Res
 
 pub fn open(blob: &[u8], password: &str, record: &SealRecord, aad: &[u8]) -> Result<Vec<u8>, String> {
     if record.version != 1 || record.algorithm != "AES-256-GCM" ||
-       record.kdf != "Argon2id-v1.3-m65536-t3-p1" || record.provider != "Local" {
+       record.kdf != "Argon2id-v1.3-m65536-t3-p4" || record.provider != "Local" {
         return Err("unsupported_or_invalid_record".into());
     }
     if hex::encode(Sha256::digest(blob)) != record.blob_sha256 { return Err("integrity_failure".into()); }
