@@ -103,7 +103,7 @@ pub fn open(blob: &[u8], password: &str, record: &SealRecord, aad: &[u8]) -> Res
     let mut key = derive_key(password, &salt)?;
     let cipher = Aes256Gcm::new_from_slice(&key).map_err(|_| "cipher_init_failed")?;
     let result = cipher.decrypt(Nonce::from_slice(&nonce), Payload { msg: blob, aad })
-        .map_err(|_| "authentication_failed");
+        .map_err(|_| "authentication_failed".to_string());
     key.zeroize();
     result
 }
