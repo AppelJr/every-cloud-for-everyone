@@ -126,7 +126,7 @@ class MCPAuthorityAdapterTests(unittest.TestCase):
             {"tool": "test_helper", "args": []}, identity=self.identity
         )
         self.assertEqual(result["status"], "error")
-        self.assertEqual(result["reason"], "audit_unavailable; denied")
+        self.assertEqual(result["reason"], "audit_unavailable; execution_not_started")
 
     def test_stdin_cli_refuses_execution_without_host_identity(self):
         result = subprocess.run(
