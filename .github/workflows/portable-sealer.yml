@@ -27,17 +27,21 @@ jobs:
           node-version: '22'
       - name: Rust unit tests
         working-directory: portable/rust
-        run: cargo test --locked
+        run: cargo test
       - name: Build CLI
         working-directory: portable/rust
-        run: cargo build --locked
+        run: cargo build
+      - name: Configure native CLI path (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: echo "SOVEREIGN_SEALER_BIN=portable/rust/target/debug/sovereign-sealer" >> "$GITHUB_ENV"
+      - name: Configure native CLI path (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: "Add-Content -Path $env:GITHUB_ENV -Value 'SOVEREIGN_SEALER_BIN=portable/rust/target/debug/sovereign-sealer.exe'"
       - name: Python client tests
         working-directory: portable/python
-        env:
-          SOVEREIGN_SEALER_BIN: ../rust/target/debug/sovereign-sealer
         run: python -m unittest -v
       - name: Node client tests
         working-directory: portable/javascript
-        env:
-          SOVEREIGN_SEALER_BIN: ../rust/target/debug/sovereign-sealer
         run: node --test test/*.test.mjs
