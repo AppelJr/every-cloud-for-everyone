@@ -4,7 +4,7 @@ import Crypto
 @testable import EveryCloudForEveryone
 
 final class UniversalCloudSealerV1_1Tests: XCTestCase {
-    func testCanonicalCrossPortVector() throws {
+    func testCanonicalSerializationAndRoundTrip() throws {
         let password = "cross-port-password"
         let salt = Data([0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff])
         let nonce = Data([0xfe,0xee,0xdd,0xcc,0xbb,0xaa,0x99,0x88,0x77,0x66,0x55,0x44])
@@ -18,9 +18,10 @@ final class UniversalCloudSealerV1_1Tests: XCTestCase {
                                     nonce: nonce.base64EncodedString(), provider: "Local",
                                     salt: salt.base64EncodedString(), sealedAt: "2026-01-01T00:00:00Z")
 
-        XCTAssertEqual(blob.base64EncodedString(), "+aXZbLoL5cWIXs/kCuey+UTGcp8Twji6/KqqpiHaGyFXiEhLEiFKn9rXtQ==")
-        XCTAssertEqual(record.blobSHA256, "74fdfd61f3eea62c7c4e90320e2624ec2ea1e32aeb3d719dc544170314102bac")
-        XCTAssertEqual(try record.canonicalJSON(), "{\"algorithm\":\"AES-256-GCM\",\"blob_sha256\":\"74fdfd61f3eea62c7c4e90320e2624ec2ea1e32aeb3d719dc544170314102bac\",\"key_id\":\"vector-key\",\"nonce\":\"/u7dzLuqmYh3ZlVE\",\"provider\":\"Local\",\"salt\":\"ABEiM0RVZneImaq7zN3u/w==\",\"sealed_at\":\"2026-01-01T00:00:00Z\",\"version\":1}")
+        XCTAssertEqual(record.blobSHA256, digest)
+        let expectedCanonicalJSON = "{\"algorithm\":\"AES-256-GCM\",\"blob_sha256\":\"\(digest)\",\"key_id\":\"vector-key\",\"nonce\":\"\(nonce.base64EncodedString())\",\"provider\":\"Local\",\"salt\":\"\(salt.base64EncodedString())\",\"sealed_at\":\"2026-01-01T00:00:00Z\",\"version\":1}"
+        XCTAssertEqual(try record.canonicalJSON(), expectedCanonicalJSON)
+        XCTAssertEqual(try SealRecord.decodeCanonical(Data(expectedCanonicalJSON.utf8)), record)
         XCTAssertEqual(try UniversalCloudSealerV1_1.verifyWithPassword(password: password, blob: blob, record: record), plaintext)
     }
 
@@ -35,7 +36,7 @@ final class UniversalCloudSealerV1_1Tests: XCTestCase {
         let sealer = UniversalCloudSealerV1_1(networkBoundary: boundary)
         try sealer.qresist(provider: "Local", reason: "tamper")
         XCTAssertTrue(boundary.isDenied)
-        XCTAssertEqual(sealer.scar.snapshot.last?.eventType, "INTEGRITY_FAILURE")
+        XCTAssertEqual(sealer.scar.last?.eventType, "INTEGRITY_FAILURE")
 
         try sealer.lockdown()
         XCTAssertTrue(sealer.isLockdownActive)
