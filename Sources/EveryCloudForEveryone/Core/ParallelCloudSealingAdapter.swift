@@ -1,7 +1,8 @@
 import Foundation
 import Crypto
 
-/// A Gate-issued receipt must be supplied by the application authority adapter.
+/// The implementation must cryptographically verify a Gate-issued, task-bound
+/// receipt against a trusted issuer key and reject expired/revoked receipts.
 /// This protocol intentionally has no permissive default implementation.
 public protocol ParallelCloudEgressAuthorizer: Sendable {
     func isAuthorized(taskID: String, plaintextDigest: String) async -> Bool
