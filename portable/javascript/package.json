@@ -1,0 +1,8 @@
+{
+  "name": "@sovereignty/universal-sealer",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": "./index.mjs",
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" }
+}
